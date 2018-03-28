@@ -23,9 +23,9 @@ Git commit: %s
 )
 
 type Config struct {
-	token     string
-	backupDir string
-	logFile   string
+	Token     string
+	BackupDir string
+	LogFile   string
 }
 
 var (
@@ -40,9 +40,9 @@ var (
 
 func initConfig(filename string, token string) {
 	config = Config{
-		token: token,
-		backupDir: os.Getenv("HOME"),
-		logFile: "",
+		Token: token,
+		BackupDir: os.Getenv("HOME")+"/ghc_backups",
+		LogFile: "",
 	}
 
 	if (filename != "") {
@@ -83,26 +83,26 @@ func init() {
 
 	initConfig(configFile, token)
 
-	if (config.logFile != "") {
-		_, err := os.Stat(config.logFile);
+	if (config.LogFile != "") {
+		_, err := os.Stat(config.LogFile);
 		var logfile *os.File
 		if (os.IsNotExist(err)) {
-			logfile, err = os.Create(config.logFile)
+			logfile, err = os.Create(config.LogFile)
 		} else {
-			logfile, err = os.Open(config.logFile)
+			logfile, err = os.Open(config.LogFile)
 		}
 		if (err != nil) {
-			fmt.Printf("[ERROR] Could not open logfile %s\n %s", config.logFile, err);
+			fmt.Printf("[ERROR] Could not open logfile %s\n %s", config.LogFile, err);
 			os.Exit(1)
 		}
-		Info = log.New(logfile, "", log.Ldate|log.Ltime|log.Lshortfile)
+		Info = log.New(logfile, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
 		Error = log.New(logfile, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
 	} else {
-		Info = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
+		Info = log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
 		Error = log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
 	}
 
-	if (config.token == "") {
+	if (config.Token == "") {
 		Error.Println("Github token is required but wasn't set via --token flag, JSON config file,  or found via GITHUB_TOKEN environment variable")
 		os.Exit(1)
 	}
@@ -119,20 +119,17 @@ func main() {
 
 	ctx := context.Background()
 
-	auth := oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: config.token}))
+	auth := oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: config.Token}))
 	client := github.NewClient(auth)
 
 	user, _, err := client.Users.Get(ctx, "")
-	if err != nil {
+	if (err != nil) {
 		Error.Fatalf("%v", err)
 	}
 
-	Info.Printf("%v\n", github.Stringify(user))
-
-	backupGists(ctx, user.Login)
+	// gists.go
+	gists(ctx, client, user.Login)
 
 	os.Exit(0)
 }
 
-func backupGists(ctx context.Context, username *string) {
-}

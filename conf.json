@@ -1,4 +1,4 @@
 {
-    "backupDir" : "~",
-    "logFile" : "~/ghc.log"
+    "backupDir" : "/Users/matt/gists",
+    "logFile" : "/Users/matt/ghc.log"
 }
