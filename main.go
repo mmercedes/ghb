@@ -95,7 +95,18 @@ func main() {
 	ctx := context.Background()
 
 	auth := oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: config.Token}))
-	client := github.NewClient(auth)
+
+	var client *github.Client
+	if (config.EnterpriseUrl == "") {
+		client = github.NewClient(auth)
+	} else {
+		var err error
+		client, err = github.NewEnterpriseClient(config.EnterpriseUrl, config.EnterpriseUrl, auth)
+		if (err != nil) {
+			Error.Printf("Could not create github enterprise API client\n%s\n", err)
+			shutdown(1)
+		}
+	}
 
 	user, _, err := client.Users.Get(ctx, "")
 	if (err != nil) {

@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	Token      string
-	BackupDir  string
-
-	FullBackup bool
+	Token         string
+	BackupDir     string
+	EnterpriseUrl string
+	
+	FullBackup    bool
 }
 
 func configure(filename string, token string) {
@@ -19,6 +20,7 @@ func configure(filename string, token string) {
 	defaults := Config{
 		Token: token,
 		BackupDir: os.Getenv("HOME")+"/.ghc/backups",
+		EnterpriseUrl: "",
 		FullBackup: false,
 	}
 
@@ -26,6 +28,8 @@ func configure(filename string, token string) {
 	if (filename == "") {
 		filename = os.Getenv("HOME")+"/.ghc/conf.json";
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
+			fmt.Printf("No config file found in %s using defaults\n", filename)
+			config = defaults
 			return
 		} 
 	}
@@ -41,8 +45,6 @@ func configure(filename string, token string) {
 	}
 
 	// if the parsed config has any empty string options, set them to the defaults
-	// there might be a better way to do this, go n00b here
-	
 	rconfig := reflect.ValueOf(&config).Elem()
 	rdefault := reflect.ValueOf(&defaults).Elem()
 	
@@ -50,6 +52,9 @@ func configure(filename string, token string) {
 		field := rconfig.Field(i)
 
 		if (field.Type() != reflect.TypeOf("")) {
+			continue
+		}
+		if (field.Interface().(string) != "") {
 			continue
 		}
 
