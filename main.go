@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -16,17 +15,13 @@ import (
 )
 
 const (
-	USAGE = `ghc
+	USAGE = `
+ghc
 https://github.com/mmercedes/ghc
 Git commit: %s
+
 `
 )
-
-type Config struct {
-	Token     string
-	BackupDir string
-	LogFile   string
-}
 
 var (
 	GitCommit string
@@ -37,38 +32,22 @@ var (
 	Error     *log.Logger
 )
 
-
-func initConfig(filename string, token string) {
-	config = Config{
-		Token: token,
-		BackupDir: os.Getenv("HOME")+"/ghc_backups",
-		LogFile: "",
-	}
-
-	if (filename != "") {
-		file, _ := os.Open(filename)
-		defer file.Close()
-		decoder := json.NewDecoder(file)
-		err := decoder.Decode(&config)
-
-		if (err != nil) {
-			fmt.Printf("Could not parse config file %s\n %s\n", filename, err)
-			os.Exit(1)
-		} else {
-			fmt.Printf("Successfully parsed config file %s. Result:\n %+v\n", filename, config)
-		}
-	}
-}
-
 func init() {
-	var configFile string
-	var token string
-	var version bool
+	var (
+		configFile string
+		token      string
+
+		version    bool
+		debug      bool
+		nocolor    bool
+	)
 	
 	flag.StringVar(&token, "token", os.Getenv("GITHUB_TOKEN"), "Github API token")
-	flag.StringVar(&configFile, "config", "", "JSON configuration file full path")
+	flag.StringVar(&configFile, "config", os.Getenv("HOME")+"/.ghc/conf.json", "JSON configuration file full path")
 	flag.BoolVar(&version, "v", false, "print version")
-
+	flag.BoolVar(&debug, "d", false, "run in debug mode")
+	flag.BoolVar(&nocolor, "nc", false, "dont color output")
+	
 	flag.Usage = func() {
 		fmt.Printf(USAGE, GitCommit)
 		flag.PrintDefaults()
@@ -78,33 +57,29 @@ func init() {
 
 	if (version) {
 		fmt.Printf(USAGE, GitCommit)
-		os.Exit(0)
+		shutdown(0)
 	}
 
-	initConfig(configFile, token)
-
-	if (config.LogFile != "") {
-		_, err := os.Stat(config.LogFile);
-		var logfile *os.File
-		if (os.IsNotExist(err)) {
-			logfile, err = os.Create(config.LogFile)
-		} else {
-			logfile, err = os.Open(config.LogFile)
-		}
-		if (err != nil) {
-			fmt.Printf("[ERROR] Could not open logfile %s\n %s", config.LogFile, err);
-			os.Exit(1)
-		}
-		Info = log.New(logfile, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
-		Error = log.New(logfile, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
-	} else {
-		Info = log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
-		Error = log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
-	}
+	// config.go
+	configure(configFile, token)
 
 	if (config.Token == "") {
 		Error.Println("Github token is required but wasn't set via --token flag, JSON config file,  or found via GITHUB_TOKEN environment variable")
-		os.Exit(1)
+		shutdown(1)
+	}
+
+	logout := ""
+	logerr := ""
+	if (!nocolor) {
+		logout = "\033[1;32m" // light green
+		logerr = "\033[0;31m" // red
+	}
+	if (debug) {
+		Info = log.New(os.Stdout, logout+"[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
+		Error = log.New(os.Stderr, logerr+"[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
+	} else {
+		Info = log.New(os.Stdout, logout, 0)
+		Error = log.New(os.Stderr, logerr, 0)
 	}
 }
 
@@ -114,7 +89,7 @@ func main() {
 	go func() {
 		sig := <-sigchan
 		Info.Printf("Received %s, exiting.\n", sig.String()) 
-		os.Exit(0)
+		shutdown(0)
 	}()
 
 	ctx := context.Background()
@@ -130,6 +105,9 @@ func main() {
 	// gists.go
 	gists(ctx, client, user.Login)
 
-	os.Exit(0)
+	shutdown(0)
 }
 
+func shutdown(code int) {
+	os.Exit(code)
+}

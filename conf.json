@@ -1,4 +1,4 @@
 {
-    "backupDir" : "/Users/matt/gists",
-    "logFile" : "/Users/matt/ghc.log"
+    "backupDir" : "",
+    "fullBackup" : false
 }
