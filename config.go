@@ -12,6 +12,8 @@ type Config struct {
 	BackupDir     string
 	EnterpriseUrl string
 	
+	DeleteAfter   int
+
 	FullBackup    bool
 }
 
@@ -21,6 +23,7 @@ func configure(filename string, token string) {
 		Token: token,
 		BackupDir: os.Getenv("HOME")+"/.ghc/backups",
 		EnterpriseUrl: "",
+		DeleteAfter: 0,
 		FullBackup: false,
 	}
 

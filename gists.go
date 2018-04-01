@@ -37,7 +37,52 @@ func gistsBackup(gist *github.Gist) {
 	Info.Printf("Backed up gist '%s' into %s", *gist.HTMLURL, config.BackupDir)
 }
 
-func gistsBackupAll(ctx context.Context, client *github.Client, username *string) {
+func gistsBackupAll(gists []*github.Gist) {
+	command := "curl"
+	if (config.FullBackup) {
+		command = "git"
+	}
+
+	err := exec.Command("command", "-v", command).Run()
+	if (err != nil) {
+		Error.Printf("Failed to backup gists. command '%s' not found\n", command)
+		return
+	}
+
+	if _, err := os.Stat(config.BackupDir); os.IsNotExist(err) {
+		os.MkdirAll(config.BackupDir, 0755)
+	}
+
+	for _, gist := range gists {
+		gistsBackup(gist)
+	}
+	return
+}
+
+func gistsDelete(gists []*github.Gist, ctx context.Context, client *github.Client) {
+	if (config.DeleteAfter == 0) {
+		return
+	}
+	
+	cutoff := time.Now().AddDate(0, 0, -config.DeleteAfter)
+	deleted := 0
+	for _, gist := range gists {
+		if (gist.UpdatedAt.After(cutoff)) {
+			continue
+		}
+		response, err := client.Gists.Delete(ctx, *gist.ID)
+		if (err != nil) {
+			Error.Printf("Failed to delete gist %s\n%s", *gist.HTMLURL, err)
+		}
+		if (response.StatusCode != 204) {
+			Error.Printf("Received %d response when attempting to delete gist %s", response.StatusCode, *gist.HTMLURL)
+		}
+		deleted++
+	}
+	Info.Printf("Deleted %d gists with no updates after %s", deleted, cutoff.String())
+}
+
+func gists(ctx context.Context, client *github.Client, username *string) {
 	opts := &github.GistListOptions{Since: time.Time{}}
 
 	gists, response, err := client.Gists.List(ctx, *username, opts)
@@ -54,27 +99,6 @@ func gistsBackupAll(ctx context.Context, client *github.Client, username *string
 		Info.Printf("No gists found for %s", *username)
 		return
 	}
-
-	if _, err := os.Stat(config.BackupDir); os.IsNotExist(err) {
-		os.MkdirAll(config.BackupDir, 0755)
-	}
-
-	for _, gist := range gists {
-		gistsBackup(gist)
-	}
-	return
-}
-
-func gists(ctx context.Context, client *github.Client, username *string) {
-	command := "curl"
-	if (config.FullBackup) {
-		command = "git"
-	}
-
-	err := exec.Command("command", "-v", command).Run()
-	if (err != nil) {
-		Error.Printf("Failed to backup gists. command '%s' not found\n", command)
-		return
-	}
-	gistsBackupAll(ctx, client, username)
+	gistsBackupAll(gists)
+	gistsDelete(gists, ctx, client)
 }

@@ -1,5 +1,6 @@
 {
     "backupDir" : "",
+    "deleteAfter" : 0,
     "enterpriseUrl": "",
     "fullBackup" : false
 }
