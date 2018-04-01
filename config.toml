@@ -1,16 +1,32 @@
-#    Github personal access token
-#    https://github.com/settings/tokens
-#token = ""
+# Github personal access token
+# https://github.com/settings/tokens
+# can be passed in via command line option
+# default : $GITHUB_TOKEN 
+token = ""
 
-#    URL to Github Enterprise if using. ex: github.mycompany.com
-#[enterprise]
-#url = ""
+# enterprise options:
+#   url (string)
+#     location of github enterprise instance ex. github.mycompany.com
+#     default: "" (connect to github.com api)
+[enterprise]
+url = ""
 
+# gist config options:
+#   backupdir (string)
+#     full path of directory to backup gists to
+#     default: $HOME/.ghc.backups
+#   retention (int)
+#     number of days after which gists will be deleted if not updated
+#     default: 0 (never delete)
+#   fileonly (bool)
+#     since gists are full git repos, they can be backed up with history via git clone
+#     if true this will instead backup the gist files only via curl to the raw url
+#     default: true
+#   prompt (bool)
+#     wether to prompt the user before deletions
+#     default: false
 [gists]
-#    directory to backup gists to. default: $HOME/.ghc/backups
-#backupdir = ""
-#    number of days after which gists will be deleted if not updated. 0 = never delete
+backupdir = ""
 retention = 0
-#    gists are full repos, if false this will backup gists via a git clone
-#    if false simply save the file(s) to disks without git history
 fileonly = true
+prompt = false

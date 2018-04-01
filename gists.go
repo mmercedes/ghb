@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"time"
@@ -69,6 +70,12 @@ func gistsDelete(gists []*github.Gist, ctx context.Context, client *github.Clien
 	for _, gist := range gists {
 		if (gist.UpdatedAt.After(cutoff)) {
 			continue
+		}
+		if (config.GetBool("gists.prompt")) {
+			confirmed := prompt(fmt.Sprintf("Delete gist %s ?", *gist.HTMLURL))
+			if (!confirmed) {
+				continue
+			}
 		}
 		response, err := client.Gists.Delete(ctx, *gist.ID)
 		if (err != nil) {

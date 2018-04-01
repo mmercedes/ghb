@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"golang.org/x/oauth2"
@@ -125,4 +126,17 @@ func main() {
 
 func shutdown(code int) {
 	os.Exit(code)
+}
+
+func prompt(msg string) bool {
+	var resp string
+
+	fmt.Print(msg + " [y/N]: ")
+
+	_, err := fmt.Scanln(&resp)
+	if (err != nil) {
+		Error.Printf("Failed to read input from user prompt\n%s\n", err)
+		return false
+	}
+	return (strings.ToLower(resp) == "y")
 }
