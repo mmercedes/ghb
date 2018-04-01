@@ -1,0 +1,16 @@
+#    Github personal access token
+#    https://github.com/settings/tokens
+#token = ""
+
+#    URL to Github Enterprise if using. ex: github.mycompany.com
+#[enterprise]
+#url = ""
+
+[gists]
+#    directory to backup gists to. default: $HOME/.ghc/backups
+#backupdir = ""
+#    number of days after which gists will be deleted if not updated. 0 = never delete
+retention = 0
+#    gists are full repos, if false this will backup gists via a git clone
+#    if false simply save the file(s) to disks without git history
+fileonly = true

@@ -10,8 +10,9 @@ import (
 	"syscall"
 
 	"golang.org/x/oauth2"
-	
+
 	"github.com/google/go-github/github"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -26,7 +27,7 @@ Git commit: %s
 var (
 	GitCommit string
 	
-	config    Config
+	config    *viper.Viper
 
 	Info      *log.Logger
 	Error     *log.Logger
@@ -43,7 +44,7 @@ func init() {
 	)
 	
 	flag.StringVar(&token, "token", os.Getenv("GITHUB_TOKEN"), "Github API token")
-	flag.StringVar(&configFile, "config", os.Getenv("HOME")+"/.ghc/conf.json", "JSON configuration file full path")
+	flag.StringVar(&configFile, "config", "", "path to configuration file")
 	flag.BoolVar(&version, "v", false, "print version")
 	flag.BoolVar(&debug, "d", false, "run in debug mode")
 	flag.BoolVar(&nocolor, "nc", false, "dont color output")
@@ -63,11 +64,6 @@ func init() {
 	// config.go
 	configure(configFile, token)
 
-	if (config.Token == "") {
-		Error.Println("Github token is required but wasn't set via --token flag, JSON config file,  or found via GITHUB_TOKEN environment variable")
-		shutdown(1)
-	}
-
 	logout := ""
 	logerr := ""
 	if (!nocolor) {
@@ -81,6 +77,13 @@ func init() {
 		Info = log.New(os.Stdout, logout, 0)
 		Error = log.New(os.Stderr, logerr, 0)
 	}
+
+	if (config.GetString("token") == "") {
+		Error.Println("Github token is required but wasn't set via --token flag, JSON config file,  or found via GITHUB_TOKEN environment variable")
+		shutdown(1)
+	}
+
+
 }
 
 func main() {
@@ -94,14 +97,15 @@ func main() {
 
 	ctx := context.Background()
 
-	auth := oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: config.Token}))
+	auth := oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: config.GetString("token")}))
 
 	var client *github.Client
-	if (config.EnterpriseUrl == "") {
+	gheUrl := config.GetString("enterprise.url")
+	if (gheUrl == "") {
 		client = github.NewClient(auth)
 	} else {
 		var err error
-		client, err = github.NewEnterpriseClient(config.EnterpriseUrl, config.EnterpriseUrl, auth)
+		client, err = github.NewEnterpriseClient(gheUrl, gheUrl, auth)
 		if (err != nil) {
 			Error.Printf("Could not create github enterprise API client\n%s\n", err)
 			shutdown(1)

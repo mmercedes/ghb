@@ -10,8 +10,8 @@ import (
 )
 
 func gistsBackup(gist *github.Gist) {
-	if (config.FullBackup) {
-		backupDir := config.BackupDir +"/"+ *gist.ID
+	if (!config.GetBool("gists.fileonly")) {
+		backupDir := config.GetString("gists.backupdir") +"/"+ *gist.ID
 		if _, err := os.Stat(backupDir); os.IsNotExist(err) {
 			output, err := exec.Command("git", "clone", "-q", *gist.GitPullURL, backupDir).CombinedOutput()
 			if (err != nil) {
@@ -27,19 +27,19 @@ func gistsBackup(gist *github.Gist) {
 		}
 	} else {
 		for _, file := range gist.Files {
-			filename := config.BackupDir + "/" + *gist.ID + "_" + *file.Filename
+			filename := config.GetString("gists.backupdir") + "/" + *gist.ID + "_" + *file.Filename
 			output, err := exec.Command("curl", "-s", *file.RawURL, "-o", filename).CombinedOutput()
 			if (err != nil) {
-				Error.Printf("Failed to curl gist file %s (%s) into %s\n%s\n", *file.Filename, *file.RawURL, config.BackupDir, output)
+				Error.Printf("Failed to curl gist file %s (%s) into %s\n%s\n", *file.Filename, *file.RawURL, config.GetString("gists.backupdir"), output)
 			}
 		}				
 	}
-	Info.Printf("Backed up gist '%s' into %s", *gist.HTMLURL, config.BackupDir)
+	Info.Printf("Backed up gist '%s' into %s", *gist.HTMLURL, config.GetString("gists.backupdir"))
 }
 
 func gistsBackupAll(gists []*github.Gist) {
 	command := "curl"
-	if (config.FullBackup) {
+	if (!config.GetBool("gists.fileonly")) {
 		command = "git"
 	}
 
@@ -49,8 +49,8 @@ func gistsBackupAll(gists []*github.Gist) {
 		return
 	}
 
-	if _, err := os.Stat(config.BackupDir); os.IsNotExist(err) {
-		os.MkdirAll(config.BackupDir, 0755)
+	if _, err := os.Stat(config.GetString("gists.backupdir")); os.IsNotExist(err) {
+		os.MkdirAll(config.GetString("gists.backupdir"), 0755)
 	}
 
 	for _, gist := range gists {
@@ -60,11 +60,11 @@ func gistsBackupAll(gists []*github.Gist) {
 }
 
 func gistsDelete(gists []*github.Gist, ctx context.Context, client *github.Client) {
-	if (config.DeleteAfter == 0) {
+	if (config.GetInt("gists.retention") == 0) {
 		return
 	}
 	
-	cutoff := time.Now().AddDate(0, 0, -config.DeleteAfter)
+	cutoff := time.Now().AddDate(0, 0, -config.GetInt("gists.retention"))
 	deleted := 0
 	for _, gist := range gists {
 		if (gist.UpdatedAt.After(cutoff)) {

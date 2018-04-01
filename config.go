@@ -1,70 +1,45 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"reflect"
+	
+	"github.com/spf13/viper"
 )
 
-type Config struct {
-	Token         string
-	BackupDir     string
-	EnterpriseUrl string
-	
-	DeleteAfter   int
-
-	FullBackup    bool
+func configDefaults(config *viper.Viper, token string) {
+	defaults := map[string]interface{}{
+		"token": token,
+		"enterprise": map[string]string{
+			"url": "",
+		},
+		"gists": map[string]interface{}{
+			"backupdir": os.Getenv("HOME")+"/.ghc/backups",
+			"retention": 0,
+			"fileonly": true,
+		},
+	}
+	for key, value := range defaults {
+		config.SetDefault(key, value)
+	}
 }
 
 func configure(filename string, token string) {
-	config = Config{}
-	defaults := Config{
-		Token: token,
-		BackupDir: os.Getenv("HOME")+"/.ghc/backups",
-		EnterpriseUrl: "",
-		DeleteAfter: 0,
-		FullBackup: false,
-	}
+	config = viper.New()
+	config.AutomaticEnv()
 
-	// check for config file in default location
+	configDefaults(config, token)
+
 	if (filename == "") {
-		filename = os.Getenv("HOME")+"/.ghc/conf.json";
-		if _, err := os.Stat(filename); os.IsNotExist(err) {
-			fmt.Printf("No config file found in %s using defaults\n", filename)
-			config = defaults
-			return
-		} 
+		config.SetConfigName("config")
+		config.AddConfigPath(os.Getenv("HOME")+"/.ghc")
+	} else {
+		config.SetConfigFile(filename)
 	}
-
-	file, _ := os.Open(filename)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&config)
-	
+	err := config.ReadInConfig()
 	if (err != nil) {
-		fmt.Printf("Could not parse config file %s\n %s\n", filename, err)
+		fmt.Printf("Could not parse config file %s\n%s", filename, err)
 		shutdown(1)
 	}
-
-	// if the parsed config has any empty string options, set them to the defaults
-	rconfig := reflect.ValueOf(&config).Elem()
-	rdefault := reflect.ValueOf(&defaults).Elem()
-	
-	for i := 0; i < rconfig.NumField(); i++ {
-		field := rconfig.Field(i)
-
-		if (field.Type() != reflect.TypeOf("")) {
-			continue
-		}
-		if (field.Interface().(string) != "") {
-			continue
-		}
-
-		defstr := rdefault.Field(i).Interface().(string)
-		field.SetString(defstr)
-	}
-
-	fmt.Printf("Successfully parsed config file %s. Result:\n %+v\n", filename, config)
 }
 
