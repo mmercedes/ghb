@@ -15,9 +15,13 @@ url = ""
 #   backupdir (string)
 #     full path of directory to backup gists to
 #     default: $HOME/.ghc.backups
-#   retention (int)
-#     number of days after which gists will be deleted if not updated
-#     default: 0 (never delete)
+#   backupregex (string)
+#     only backup gists with filenames macthing this regular expression
+#     regex documentaion https://github.com/google/re2/wiki/Syntax
+#     default: "" (backup all gists)
+#   deleteregex (string)
+#     delete any gist with filenames matching this regular expression
+#     default: "" (dont delete any gists)
 #   fileonly (bool)
 #     since gists are full git repos, they can be backed up with history via git clone
 #     if true this will instead backup the gist files only via curl to the raw url
@@ -25,8 +29,16 @@ url = ""
 #   prompt (bool)
 #     wether to prompt the user before deletions
 #     default: false
+#   retention (int)
+#     number of days after which gists will be deleted if not updated
+#     default: 0 (never delete)
+# NOTE:
+#   deleteregex and retention are evauluated together via a logical OR.
+#   if both are configured, any gists matching either of the criteria will be deleted
 [gists]
 backupdir = ""
-retention = 0
+backupregex = ""
+deleteregex = ""
 fileonly = true
 prompt = false
+retention = 0

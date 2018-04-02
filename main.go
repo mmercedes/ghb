@@ -27,11 +27,11 @@ Git commit: %s
 
 var (
 	GitCommit string
-	
-	config    *viper.Viper
 
-	Info      *log.Logger
-	Error     *log.Logger
+	config *viper.Viper
+
+	Info  *log.Logger
+	Error *log.Logger
 )
 
 func init() {
@@ -39,17 +39,17 @@ func init() {
 		configFile string
 		token      string
 
-		version    bool
-		debug      bool
-		nocolor    bool
+		version bool
+		debug   bool
+		nocolor bool
 	)
-	
+
 	flag.StringVar(&token, "token", os.Getenv("GITHUB_TOKEN"), "Github API token")
 	flag.StringVar(&configFile, "config", "", "path to configuration file")
 	flag.BoolVar(&version, "v", false, "print version")
 	flag.BoolVar(&debug, "d", false, "run in debug mode")
 	flag.BoolVar(&nocolor, "nc", false, "dont color output")
-	
+
 	flag.Usage = func() {
 		fmt.Printf(USAGE, GitCommit)
 		flag.PrintDefaults()
@@ -57,7 +57,7 @@ func init() {
 
 	flag.Parse()
 
-	if (version) {
+	if version {
 		fmt.Printf(USAGE, GitCommit)
 		shutdown(0)
 	}
@@ -67,11 +67,11 @@ func init() {
 
 	logout := ""
 	logerr := ""
-	if (!nocolor) {
+	if !nocolor {
 		logout = "\033[1;32m" // light green
 		logerr = "\033[0;31m" // red
 	}
-	if (debug) {
+	if debug {
 		Info = log.New(os.Stdout, logout+"[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
 		Error = log.New(os.Stderr, logerr+"[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
 	} else {
@@ -79,11 +79,10 @@ func init() {
 		Error = log.New(os.Stderr, logerr, 0)
 	}
 
-	if (config.GetString("token") == "") {
+	if config.GetString("token") == "" {
 		Error.Println("Github token is required but wasn't set via --token flag, JSON config file,  or found via GITHUB_TOKEN environment variable")
 		shutdown(1)
 	}
-
 
 }
 
@@ -92,7 +91,7 @@ func main() {
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigchan
-		Info.Printf("Received %s, exiting.\n", sig.String()) 
+		Info.Printf("Received %s, exiting.\n", sig.String())
 		shutdown(0)
 	}()
 
@@ -102,19 +101,19 @@ func main() {
 
 	var client *github.Client
 	gheUrl := config.GetString("enterprise.url")
-	if (gheUrl == "") {
+	if gheUrl == "" {
 		client = github.NewClient(auth)
 	} else {
 		var err error
 		client, err = github.NewEnterpriseClient(gheUrl, gheUrl, auth)
-		if (err != nil) {
+		if err != nil {
 			Error.Printf("Could not create github enterprise API client\n%s\n", err)
 			shutdown(1)
 		}
 	}
 
 	user, _, err := client.Users.Get(ctx, "")
-	if (err != nil) {
+	if err != nil {
 		Error.Fatalf("%v", err)
 	}
 
@@ -134,7 +133,7 @@ func prompt(msg string) bool {
 	fmt.Print(msg + " [y/N]: ")
 
 	_, err := fmt.Scanln(&resp)
-	if (err != nil) {
+	if err != nil {
 		Error.Printf("Failed to read input from user prompt\n%s\n", err)
 		return false
 	}

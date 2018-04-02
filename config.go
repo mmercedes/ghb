@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	
+
 	"github.com/spf13/viper"
 )
 
@@ -14,9 +14,12 @@ func configDefaults(config *viper.Viper, token string) {
 			"url": "",
 		},
 		"gists": map[string]interface{}{
-			"backupdir": os.Getenv("HOME")+"/.ghc/backups",
-			"retention": 0,
-			"fileonly": true,
+			"backupdir":   os.Getenv("HOME") + "/.ghc/backups",
+			"backupregex": "",
+			"deleteregex": "",
+			"retention":   0,
+			"fileonly":    true,
+			"prompt":      false,
 		},
 	}
 	for key, value := range defaults {
@@ -30,16 +33,15 @@ func configure(filename string, token string) {
 
 	configDefaults(config, token)
 
-	if (filename == "") {
+	if filename == "" {
 		config.SetConfigName("config")
-		config.AddConfigPath(os.Getenv("HOME")+"/.ghc")
+		config.AddConfigPath(os.Getenv("HOME") + "/.ghc")
 	} else {
 		config.SetConfigFile(filename)
 	}
 	err := config.ReadInConfig()
-	if (err != nil) {
+	if err != nil {
 		fmt.Printf("Could not parse config file %s\n%s", filename, err)
 		shutdown(1)
 	}
 }
-
