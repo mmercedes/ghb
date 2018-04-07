@@ -18,8 +18,8 @@ import (
 
 const (
 	USAGE = `
-ghc
-https://github.com/mmercedes/ghc
+ghb
+https://github.com/mmercedes/ghb
 Git commit: %s
 
 `

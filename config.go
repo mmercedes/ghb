@@ -14,7 +14,7 @@ func configDefaults(config *viper.Viper, token string) {
 			"url": "",
 		},
 		"gists": map[string]interface{}{
-			"backupdir":   os.Getenv("HOME") + "/.ghc/backups/gists",
+			"backupdir":   os.Getenv("HOME") + "/.ghb/backups/gists",
 			"backupregex": "",
 			"deleteregex": "",
 			"retention":   0,
@@ -22,7 +22,7 @@ func configDefaults(config *viper.Viper, token string) {
 			"prompt":      false,
 		},
 		"starred": map[string]interface{}{
-			"backupdir": os.Getenv("HOME") + "/.ghc/backups/starred",
+			"backupdir": os.Getenv("HOME") + "/.ghb/backups/starred",
 			"shallow":   true,
 			"prompt":    false,
 		},
@@ -40,7 +40,7 @@ func configure(filename string, token string) {
 
 	if filename == "" {
 		config.SetConfigName("config")
-		config.AddConfigPath(os.Getenv("HOME") + "/.ghc")
+		config.AddConfigPath(os.Getenv("HOME") + "/.ghb")
 	} else {
 		config.SetConfigFile(filename)
 	}

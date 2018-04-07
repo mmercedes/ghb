@@ -16,7 +16,7 @@
 # gist config options:
 #   backupdir (string)
 #     full path of directory to backup gists to
-#     default: $HOME/.ghc/backups/gists
+#     default: $HOME/.ghb/backups/gists
 #   backupregex (string)
 #     only backup gists with filenames macthing this regular expression
 #     regex documentaion https://github.com/google/re2/wiki/Syntax
