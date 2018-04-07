@@ -61,7 +61,7 @@ func gistsBackupAll(gists []*github.Gist) {
 			for _, file := range gist.Files {
 				match, err := regexp.MatchString(regex, *file.Filename)
 				if err != nil {
-					Error.Printf("Could not match regex %s against string %s\n%s", regex, file.Filename, err)
+					Error.Printf("Could not match regex %s against string %s\n%s", regex, *file.Filename, err)
 					break
 				}
 				if !match {
@@ -73,7 +73,6 @@ func gistsBackupAll(gists []*github.Gist) {
 			gistsBackup(gist)
 		}
 	}
-	return
 }
 
 func gistsCanDelete(gist *github.Gist, cutoff time.Time) bool {
@@ -85,7 +84,7 @@ func gistsCanDelete(gist *github.Gist, cutoff time.Time) bool {
 		for _, file := range gist.Files {
 			match, err := regexp.MatchString(regex, *file.Filename)
 			if err != nil {
-				Error.Printf("Could not match regex %s against string %s\n%s", regex, file.Filename, err)
+				Error.Printf("Could not match regex %s against string %s\n%s", regex, *file.Filename, err)
 				return false
 			}
 			if !match {
@@ -99,7 +98,7 @@ func gistsCanDelete(gist *github.Gist, cutoff time.Time) bool {
 	return true
 }
 
-func gistsDelete(gists []*github.Gist, ctx context.Context, client *github.Client) {
+func gistsDelete(ctx context.Context, gists []*github.Gist, client *github.Client) {
 	if config.GetInt("gists.retention") == 0 {
 		return
 	}
@@ -140,5 +139,5 @@ func gists(ctx context.Context, client *github.Client, username *string) {
 		return
 	}
 	gistsBackupAll(gists)
-	gistsDelete(gists, ctx, client)
+	gistsDelete(ctx, gists, client)
 }

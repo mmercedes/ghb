@@ -1,0 +1,25 @@
+archive:
+  files:
+    - README.md
+    - config.toml
+  format: tar.gz
+builds:
+  - binary: ghb
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+    hooks:
+      pre: make lint
+brew:
+  name: ghb
+  github:
+    owner: mmercedes
+    name: ghb
+  commit_author:
+    name: mmercedes
+    email:
+  description: "A tool for performing backups and deletions of Github gists and starred repositories"
+git:
+  short_hash: true

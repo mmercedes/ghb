@@ -16,17 +16,17 @@ func starredBackup(repo *github.StarredRepository, dir string) {
 
 	dir = dir + "/" + *repo.Repository.Name
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		cloneUrl := *repo.Repository.CloneURL
+		cloneURL := *repo.Repository.CloneURL
 		if config.GetBool("starred.shallow") {
-			output, err := exec.Command("git", "clone", "-q", "--depth", "1", cloneUrl, dir).CombinedOutput()
+			output, err := exec.Command("git", "clone", "-q", "--depth", "1", cloneURL, dir).CombinedOutput()
 			if err != nil {
-				Error.Printf("Failed to shallow clone repo '%s' into '%s'\n%s\n", cloneUrl, dir, output)
+				Error.Printf("Failed to shallow clone repo '%s' into '%s'\n%s\n", cloneURL, dir, output)
 				return
 			}
 		} else {
-			output, err := exec.Command("git", "clone", "-q", cloneUrl, dir).CombinedOutput()
+			output, err := exec.Command("git", "clone", "-q", cloneURL, dir).CombinedOutput()
 			if err != nil {
-				Error.Printf("Failed to clone repo '%s' into '%s'\n%s\n", cloneUrl, dir, output)
+				Error.Printf("Failed to clone repo '%s' into '%s'\n%s\n", cloneURL, dir, output)
 				return
 			}
 		}
@@ -56,7 +56,7 @@ func starredBackup(repo *github.StarredRepository, dir string) {
 func starredBackupAll(repos []*github.StarredRepository) {
 	err := exec.Command("command", "-v", "git").Run()
 	if err != nil {
-		Error.Println("Failed to backup starred repos. command 'git' not found\n")
+		Error.Println("Failed to backup starred repos. command 'git' not found")
 		return
 	}
 

@@ -17,20 +17,30 @@ import (
 )
 
 const (
+	// USAGE usage string printed
 	USAGE = `
 ghb
-https://github.com/mmercedes/ghb
-Git commit: %s
+
+A tool for performing backups and deletions of Github gists and starred repositories
+version: %s
+commit: %s
+source: https://github.com/mmercedes/ghb
+
 
 `
 )
 
+// overriden by goreleaser
+var version = "master"
+
 var (
-	GitCommit string
+	commit string
 
 	config *viper.Viper
 
-	Info  *log.Logger
+	// Info - stdout log
+	Info *log.Logger
+	// Error - stderr log
 	Error *log.Logger
 )
 
@@ -39,26 +49,26 @@ func init() {
 		configFile string
 		token      string
 
-		version bool
-		debug   bool
-		nocolor bool
+		printversion bool
+		debug        bool
+		nocolor      bool
 	)
 
 	flag.StringVar(&token, "token", os.Getenv("GITHUB_TOKEN"), "Github API token")
 	flag.StringVar(&configFile, "config", "", "path to configuration file")
-	flag.BoolVar(&version, "v", false, "print version")
+	flag.BoolVar(&printversion, "v", false, "print version")
 	flag.BoolVar(&debug, "d", false, "run in debug mode")
 	flag.BoolVar(&nocolor, "nc", false, "dont color output")
 
 	flag.Usage = func() {
-		fmt.Printf(USAGE, GitCommit)
+		fmt.Printf(USAGE, version, commit)
 		flag.PrintDefaults()
 	}
 
 	flag.Parse()
 
-	if version {
-		fmt.Printf(USAGE, GitCommit)
+	if printversion {
+		fmt.Printf(USAGE, version, commit)
 		shutdown(0)
 	}
 
@@ -100,12 +110,12 @@ func main() {
 	auth := oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: config.GetString("token")}))
 
 	var client *github.Client
-	gheUrl := config.GetString("enterprise.url")
-	if gheUrl == "" {
+	gheURL := config.GetString("enterprise.url")
+	if gheURL == "" {
 		client = github.NewClient(auth)
 	} else {
 		var err error
-		client, err = github.NewEnterpriseClient(gheUrl, gheUrl, auth)
+		client, err = github.NewEnterpriseClient(gheURL, gheURL, auth)
 		if err != nil {
 			Error.Printf("Could not create github enterprise API client\n%s\n", err)
 			shutdown(1)
