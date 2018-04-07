@@ -21,7 +21,7 @@ func gistsBackup(gist *github.Gist) {
 				return
 			}
 		} else {
-			output, err := exec.Command("git", "-C", backupDir, "pull", "-q").CombinedOutput()
+			output, err := exec.Command("git", "-C", backupDir, "pull", "origin", "-q").CombinedOutput()
 			if err != nil {
 				Error.Printf("Failed to pull remote changes to gist '%s' into '%s'\nPull URL: %s\n%s\n", *gist.HTMLURL, backupDir, *gist.GitPullURL, output)
 				return
@@ -125,14 +125,14 @@ func gistsDelete(gists []*github.Gist, ctx context.Context, client *github.Clien
 func gists(ctx context.Context, client *github.Client, username *string) {
 	opts := &github.GistListOptions{Since: time.Time{}}
 
-	gists, response, err := client.Gists.List(ctx, *username, opts)
+	gists, resp, err := client.Gists.List(ctx, *username, opts)
 
 	if err != nil {
 		Error.Printf("Could not read gists for user %s\n %s\n", *username, err)
 		return
 	}
-	if response.StatusCode != 200 {
-		Error.Printf("Revied %d response for list gists endpoint for user %s.\n", response.StatusCode, *username)
+	if resp.StatusCode != 200 {
+		Error.Printf("Recieved %d response for gists endpoint for user %s\n", resp.StatusCode, *username)
 		return
 	}
 	if len(gists) == 0 {

@@ -119,6 +119,8 @@ func main() {
 
 	// gists.go
 	gists(ctx, client, user.Login)
+	// starred.go
+	starred(ctx, client, user.Login)
 
 	shutdown(0)
 }
@@ -130,7 +132,7 @@ func shutdown(code int) {
 func prompt(msg string) bool {
 	var resp string
 
-	fmt.Print(msg + " [y/N]: ")
+	fmt.Print("\033[0m" + msg + " [y/N]: ")
 
 	_, err := fmt.Scanln(&resp)
 	if err != nil {

@@ -14,12 +14,17 @@ func configDefaults(config *viper.Viper, token string) {
 			"url": "",
 		},
 		"gists": map[string]interface{}{
-			"backupdir":   os.Getenv("HOME") + "/.ghc/backups",
+			"backupdir":   os.Getenv("HOME") + "/.ghc/backups/gists",
 			"backupregex": "",
 			"deleteregex": "",
 			"retention":   0,
 			"fileonly":    true,
 			"prompt":      false,
+		},
+		"starred": map[string]interface{}{
+			"backupdir": os.Getenv("HOME") + "/.ghc/backups/starred",
+			"shallow":   true,
+			"prompt":    false,
 		},
 	}
 	for key, value := range defaults {

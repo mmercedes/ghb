@@ -2,19 +2,21 @@
 # https://github.com/settings/tokens
 # can be passed in via command line option
 # default : $GITHUB_TOKEN 
-token = ""
+
+# token = ""
 
 # enterprise options:
 #   url (string)
 #     location of github enterprise instance ex. github.mycompany.com
 #     default: "" (connect to github.com api)
+
 [enterprise]
-url = ""
+# url = "github.mycompany.com"
 
 # gist config options:
 #   backupdir (string)
 #     full path of directory to backup gists to
-#     default: $HOME/.ghc.backups
+#     default: $HOME/.ghc/backups/gists
 #   backupregex (string)
 #     only backup gists with filenames macthing this regular expression
 #     regex documentaion https://github.com/google/re2/wiki/Syntax
@@ -35,10 +37,27 @@ url = ""
 # NOTE:
 #   deleteregex and retention are evauluated together via a logical OR.
 #   if both are configured, any gists matching either of the criteria will be deleted
+
 [gists]
-backupdir = ""
-backupregex = ""
-deleteregex = ""
+# backupdir = "/path/to/dir"
+# backupregex = ".*"
+# deleteregex = "^deleteme.*"
 fileonly = true
 prompt = false
 retention = 0
+
+# starred repos config options:
+#   backupdir (string)
+#     full path of directory to backup starred repos to
+#     default: $HOME/.ghb/backups/starred
+#   shallow (bool)
+#     wether to perform a full checkout of git history or a make a shallow clone
+#     default: true
+#   prompt (bool)
+#     wether to prompt user before performing a backup
+#     default: false
+
+[starred]
+# backupdir = "/path/to/dir"
+shallow = true
+prompt = false
