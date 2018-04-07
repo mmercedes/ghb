@@ -39,6 +39,7 @@ Linux and OSX binaries can be found under [releases](https://github.com/mmercede
 
 #### Homebrew
 ```
+brew tap mmercedes/ghb https://github.com/mmercedes/ghb
 brew install mmercedes/ghb/ghb
 ```
 
