@@ -19,7 +19,7 @@ brew:
     name: ghb
   commit_author:
     name: mmercedes
-    email:
+    email: matthewmercedes@gmail.com
   description: "A tool for performing backups and deletions of Github gists and starred repositories"
 git:
   short_hash: true
