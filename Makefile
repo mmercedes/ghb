@@ -16,7 +16,7 @@ lint:
 	$(GOPATH)/bin/megacheck -unused.exit-non-zero -simple.exit-non-zero -staticcheck.exit-non-zero
 
 .PHONY: build
-build: lint
+build: clean lint
 	$(GOPATH)/bin/dep ensure
 	go build -ldflags "-X main.commit=$(GITCOMMIT)"
 

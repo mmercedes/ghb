@@ -52,7 +52,7 @@ func gistsBackupAll(gists []*github.Gist) {
 	}
 
 	if _, err := os.Stat(config.GetString("gists.backupdir")); os.IsNotExist(err) {
-		os.MkdirAll(config.GetString("gists.backupdir"), 0755)
+		os.MkdirAll(config.GetString("gists.backupdir"), 0640)
 	}
 
 	regex := config.GetString("gists.backupregex")

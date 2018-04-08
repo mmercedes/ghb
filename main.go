@@ -72,9 +72,6 @@ func init() {
 		shutdown(0)
 	}
 
-	// config.go
-	configure(configFile, token)
-
 	logout := ""
 	logerr := ""
 	if !nocolor {
@@ -88,6 +85,9 @@ func init() {
 		Info = log.New(os.Stdout, logout, 0)
 		Error = log.New(os.Stderr, logerr, 0)
 	}
+
+	// config.go
+	configure(configFile, token)
 
 	if config.GetString("token") == "" {
 		Error.Println("Github token is required but wasn't set via --token flag, JSON config file,  or found via GITHUB_TOKEN environment variable")

@@ -62,7 +62,7 @@ func starredBackupAll(repos []*github.StarredRepository) {
 
 	dir := config.GetString("starred.backupdir")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.MkdirAll(dir, 0755)
+		os.MkdirAll(dir, 0640)
 	}
 
 	for _, repo := range repos {

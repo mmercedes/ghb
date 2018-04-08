@@ -32,6 +32,43 @@ func configDefaults(config *viper.Viper, token string) {
 	}
 }
 
+func configSetup() {
+	resp := ""
+	dir := os.Getenv("HOME") + "/.ghb"
+
+	fmt.Printf("Full path of directory to save config to [ empty for %s ] : ", dir)
+
+	i, err := fmt.Scanln(&resp)
+	if i > 0 && err != nil {
+		Error.Printf("Failed to read input for config file path\n%s\n", err)
+		shutdown(1)
+	}
+
+	if resp == "" {
+		resp = dir
+	}
+	if _, err := os.Stat(resp); os.IsNotExist(err) {
+		err = os.MkdirAll(resp, 0740)
+		if err != nil {
+			Error.Printf("Failed to create directory %s\n%s\n", resp, err)
+		}
+	}
+
+	err = config.WriteConfigAs(resp + "/config.toml")
+	if err != nil {
+		Error.Printf("Failed to write config file to %s\n%s", resp, err)
+		shutdown(1)
+	}
+	Info.Printf("Saved default config file to %s/config.toml", resp)
+
+	if resp != (dir) {
+		Info.Printf("Make edits as desired then rerun gcb with '-c %s/config.toml' to use\n", resp)
+	} else {
+		Info.Printf("Make edits as desired then rerun gcb to use\n")
+	}
+	shutdown(0)
+}
+
 func configure(filename string, token string) {
 	config = viper.New()
 	config.AutomaticEnv()
@@ -39,14 +76,20 @@ func configure(filename string, token string) {
 	configDefaults(config, token)
 
 	if filename == "" {
-		config.SetConfigName("config")
+		if _, err := os.Stat(os.Getenv("HOME") + "/.ghb/config.toml"); os.IsNotExist(err) {
+			if prompt("No config file found, would you like to create one?") {
+				configSetup()
+			}
+			return
+		}
+		config.SetConfigName("config.toml")
 		config.AddConfigPath(os.Getenv("HOME") + "/.ghb")
 	} else {
 		config.SetConfigFile(filename)
 	}
 	err := config.ReadInConfig()
 	if err != nil {
-		fmt.Printf("Could not parse config file %s\n%s", filename, err)
+		Error.Printf("Could not parse config file %s\n%s", filename, err)
 		shutdown(1)
 	}
 }
