@@ -8,7 +8,8 @@ A simple CLI tool for backing up Github gists and starred respositories
 - works for github.com and enterprise github instances
 - backup all gists or those matching a regular expression
 - delete gists older than x number of days or matching a regular expression
-- clone all of your starred respositories into a backup folder 
+- backup all of your starred respositories
+- backup all repos you own, contribute to, or owned by an orgnization you are apart of
 
 ### Usage
 ```
