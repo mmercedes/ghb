@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mmercedes/ghb.svg?branch=master)](https://travis-ci.org/mmercedes/ghb)
 
-A simple CLI tool for backing up Github gists and starred respositories
+A simple CLI tool for backing up Github repos and gists
 
 ### Features
 - works for github.com and enterprise github instances
