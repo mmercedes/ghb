@@ -26,6 +26,14 @@ func configDefaults(config *viper.Viper, token string) {
 			"shallow":   true,
 			"prompt":    false,
 		},
+		"repos": map[string]interface{}{
+			"backupdir":    os.Getenv("HOME") + "/.ghb/backups/repos",
+			"shallow":      true,
+			"prompt":       false,
+			"owner":        true,
+			"collaborator": true,
+			"orgmember":    false,
+		},
 	}
 	for key, value := range defaults {
 		config.SetDefault(key, value)
@@ -48,7 +56,7 @@ func configSetup() {
 		resp = dir
 	}
 	if _, err := os.Stat(resp); os.IsNotExist(err) {
-		err = os.MkdirAll(resp, 0740)
+		err = os.MkdirAll(resp, 0755)
 		if err != nil {
 			Error.Printf("Failed to create directory %s\n%s\n", resp, err)
 		}
@@ -82,8 +90,7 @@ func configure(filename string, token string) {
 			}
 			return
 		}
-		config.SetConfigName("config.toml")
-		config.AddConfigPath(os.Getenv("HOME") + "/.ghb")
+		config.SetConfigFile(os.Getenv("HOME") + "/.ghb/config.toml")
 	} else {
 		config.SetConfigFile(filename)
 	}

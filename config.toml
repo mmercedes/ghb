@@ -42,9 +42,36 @@
 # backupdir = "/path/to/dir"
 # backupregex = ".*"
 # deleteregex = "^deleteme.*"
-fileonly = true
-prompt = false
-retention = 0
+  fileonly = true
+  prompt = false
+  retention = 0
+
+# repos config options:
+#   backupdir (string)
+#     full path of directory to backup repos to
+#     default: $HOME/.ghb/backups/starred
+#   shallow (bool)
+#     wether to perform a full checkout of git history or a make a shallow clone
+#     default: true
+#   prompt (bool)
+#     wether to prompt user before performing a backup
+#     default: false
+#   owner (bool)
+#     backup repos where you are the owner
+#     default: true
+#   collaborator (bool(
+#     backup repos where you are a collaborator
+#     default: true
+#   orgmember (bool)
+#     backup repos of organizations you belong to
+#     default: false
+[repos]
+# backupdir = "/path/to/dir"
+  shallow = true
+  prompt = false
+  owner = true
+  collaborator = true
+  orgmember = false
 
 # starred repos config options:
 #   backupdir (string)
@@ -59,5 +86,5 @@ retention = 0
 
 [starred]
 # backupdir = "/path/to/dir"
-shallow = true
-prompt = false
+  shallow = true
+  prompt = false

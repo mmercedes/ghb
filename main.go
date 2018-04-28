@@ -131,6 +131,8 @@ func main() {
 	gists(ctx, client, user.Login)
 	// starred.go
 	starred(ctx, client, user.Login)
+	// repos.go
+	repos(ctx, client, user.Login)
 
 	shutdown(0)
 }
